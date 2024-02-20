@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, eval = FALSE)
 library(tidyverse)
 library(mosaic)
 library(dplyr)
@@ -155,7 +155,7 @@ boot_ds = do(10000)*prop(~ Q2_Confusing, data=mosaic::resample(ds_pilot))
 confint(boot_ds, level=0.95)
 ```
 
-The question being looked at is what an estimate of the true proportions of Americans who think that Dancing with the Stars is confusing.  I used a filter for the entire data and then produced a confidence interval of the proportion of the people who scored the show a 4 or 5 on the confused scale based on a boot strapped sample. Based on the data, it is estimated that between 3.87% and 11.6% of Americans find Dancing with the Stars confusing(a score of 4 or 5) with a 95% confidence level. The estimated proportion of Americans who find it confusing is 8.29%. Based on the data, a stakeholder might consider increasing understandability of the show. With a high end of more than 1/10 Americans being confused, it might be worth it to get those 1/10 of Americans as viewers. 
+##### The question being looked at is what an estimate of the true proportions of Americans who think that Dancing with the Stars is confusing.  I used a filter for the entire data and then produced a confidence interval of the proportion of the people who scored the show a 4 or 5 on the confused scale based on a boot strapped sample. Based on the data, it is estimated that between 3.87% and 11.6% of Americans find Dancing with the Stars confusing(a score of 4 or 5) with a 95% confidence level. The estimated proportion of Americans who find it confusing is 8.29%. Based on the data, a stakeholder might consider increasing understandability of the show. With a high end of more than 1/10 Americans being confused, it might be worth it to get those 1/10 of Americans as viewers. 
 
 ***
 ## Problem 4
