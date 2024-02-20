@@ -1,0 +1,174 @@
+---
+title: "SDS315 HW 4"
+author: "Annabella Smith"
+date: "2024-02-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(mosaic)
+library(dplyr)
+```
+[Link to Github](https://github.com/LoungeAct1120/SDS315-HW4.git)
+
+## Problem 1
+```{r}
+gas_p <- read.csv('gasprices.csv')
+# A) Gas stations charge more if they lack direct competition in sight.
+mean(Price ~ Competitors, data = gas_p)
+diffmean(Price ~ Competitors, data = gas_p)
+
+boot_comp = do(10000)*diffmean(Price ~ Competitors, data=mosaic::resample(gas_p))
+confint(boot_comp, level=0.95)
+
+```
+
+##### The theory anaylazed is that gas stations charge more for their gas whenever there's no other gas stations in sight. The evidence for this based on the data is slim to none. Based on a bootstrapped sample, the different between means of a gas sation with no competition vs one with competition is between -0.056 and 0.0077 with a 95% cofidence interval. Since the bootstrapped average differences include both positive and negative, the data is not significantly significant and the theory tested in inconclusive. 
+
+```{r}
+# B) The richer the area, the higher the gas prices.
+boot_rich = do(10000)*lm(Price ~ Income, data=mosaic::resample(gas_p))
+confint(boot_rich, level=0.95)
+```
+```{r}
+lower = (6.6e-07) * 10000
+higher = (1.8e-06) * 10000
+```
+##### The theory looked at is whether or not gas stations charge higher prices wehre their area has a higher income. Based on the bootstraped data, for every increase in a dollar for average income, price of gas increases between 6.6e-07 and 1.8e-06 with a 95% confidence. While this may not seem like a lot, another way to look at it is that for every increase in $10k for average income, gas prices increase between $0.0066 and $0.018. Since both ranges are positive, the theory may be true. 
+
+```{r}
+# C) Gas stations at stoplights charge more.
+mean(Price ~ Stoplight, data = gas_p)
+diffmean(Price ~ Stoplight, data = gas_p)
+
+boot_stop = do(10000)*diffmean(Price ~ Stoplight, data=mosaic::resample(gas_p))
+confint(boot_stop, level=0.95)
+
+```
+##### The theory anaylazed is that gas stations charge more for their gas whenever they are at a stoplight. Based on a bootstrapped sample, the different between means of a gas sation at a stop light vs not at a stoplight is between -0.0386 and 0.0304 with a 95% cofidence interval. Since the bootstrapped average differences include both positive and negative, the data is not significantly significant and the theory tested in inconclusive. 
+
+```{r}
+# D) Gas stations with direct highway access charge more.
+mean(Price ~ Highway, data = gas_p)
+diffmean(Price ~ Highway, data = gas_p)
+
+boot_high = do(10000)*diffmean(Price ~ Highway, data=mosaic::resample(gas_p))
+confint(boot_high, level=0.95)
+```
+##### The theory anaylazed is that gas stations charge more for their gas whenever they have highway access. Based on a bootstrapped sample, the different between means of a gas sation with direct access and without is between 0.0089 and 0.0822 with a 95% cofidence interval. Since the bootstrapped average differences includes just positive numbers, this data provides support that gas stations with direct highway access charge more for their gas at an average of $0.031. 
+
+```{r}
+# E) Shell charges more than all other non-Shell brands.
+gas_p$Brand <- replace(gas_p$Brand, gas_p$Brand != "Shell", "Other")
+
+mean(Price ~ Brand, data = gas_p)
+diffmean(Price ~ Brand, data = gas_p)
+
+boot_brand = do(10000)*diffmean(Price ~ Brand, data=mosaic::resample(gas_p))
+confint(boot_brand, level=0.95)
+```
+##### The theory anaylazed is that gas stations with Shell brand gas charge more than non-Shell brands. Based on a bootstrapped sample, the difference between means of a gas sation with with Shell and without Shell is between -0.0097 and 0.0650 with a 95% cofidence interval. Since the bootstrapped average differences include both positive and negative, the data is not significantly significant and the theory tested in inconclusive. 
+
+***
+## Problem 2
+```{r}
+sclass <- read.csv('sclass.csv')
+# Part A: Filter the data set down to include only those cars where year == 2011 and trim == "63 AMG". Based on these 116 cars, compute a 95% bootstrap confidence interval for the average mileage of 2011 S-Class 63 AMGs that were hitting the used-car market when this data was collected.
+filtered_sclass <- sclass %>%
+  filter(year == 2011, trim == "63 AMG")
+
+boot_sclass = do(10000)*mean(~ mileage, data=mosaic::resample(filtered_sclass))
+confint(boot_sclass, level=0.95)
+```
+
+##### Based on a bootstrap from the data, the average mileage for 2011 car's with trime equal to 63 AMG was between 26268 miles and 31822 miles with a 95% confidence level. 
+
+```{r}
+#Part B: Filter the data set down to include only those cars where year == 2014 and trim == "550". Based on this sample of 2889 cars, compute a 95% bootstrap confidence interval for the proportion of all 2014 S-Class 550s that were painted black. Hint: you might find this easiest if you use mutate to first define a new variable, isBlack, that is either TRUE or FALSE depending on whether the car is black.
+
+filtered_black <- sclass %>%
+  filter(year == 2014, trim == "550")
+
+filtered_black$color <- replace(filtered_black$color, filtered_black$color != "Black", "Other")
+
+prop(~color, data=filtered_black)
+
+boot_black = do(10000)*prop(~ color, data=mosaic::resample(filtered_black))
+confint(boot_black, level=0.95)
+```
+
+##### Based on the bootstrap from the data, the proportion of black cars from 2014 with a trim of 550 is between 41.7% and 45.3% with a 95% confidence level. 
+
+***
+## Problem 3
+```{r}
+pilot <- read.csv('nbc_pilotsurvey.csv')
+# 1) Question: What question are you trying to answer?
+# 2) Approach: What approach/statistical tool did you use to answer the question?
+# 3) Results: What evidence/results did your approach provide to answer the question? (E.g. any numbers, tables, figures as appropriate.)
+# 4) Conclusion: What is your conclusion about your question? Provide a written interpretation of your results, understandable to stakeholders who might plausibly take an interest in this data set.
+```
+
+```{r}
+# Part A. Consider the shows “Living with Ed” and “My Name is Earl.” Who makes people happier: Ed or Earl? Construct a filtered data set containing only viewer responses where Show == "Living with Ed" or Show == "My Name is Earl". Then construct a 95% confidence interval for the difference in mean viewer response to the Q1_Happy question for these two shows. Is there evidence that one show consistently produces a higher mean Q1_Happy response among viewers?
+e_pilot <- pilot %>%
+  filter(Show %in% c('My Name is Earl', 'Living with Ed'))
+
+mean(Q1_Happy ~ Show, data = e_pilot)
+diffmean(Q1_Happy ~ Show, data = e_pilot)
+
+boot_e = do(10000)*diffmean(Q1_Happy ~ Show, data=mosaic::resample(e_pilot))
+confint(boot_e, level=0.95)
+```
+
+##### The question being answered is is there evidence that one show, My Name is Earl or Living with Ed, produces a higher mean Q1_Happy. I used a filter for the entire data and then produced a confidence interval of differences in mean response based on a boot strapped sample. Based on the bootstrap, the difference between the average response to My Name is Earl and Living with Ed is between -0.40 and 0.097 with a 95% confidence level. Since both negative and positive differences show up in the confidence level, the data is not significantly significant. However, if need be, you could estimate that Living with Ed produces a 0.23 higher score to the question, which however is still low. It can not be said for certain, or even with 95% confidence, that either show makes people happier. If one does, it is only by a small amount. 
+
+```{r}
+# Part B. Consider the shows “The Biggest Loser” and “The Apprentice: Los Angeles.” Which reality/contest show made people feel more annoyed? Construct a filtered data set containing only viewer responses where Show == "The Biggest Loser" or Show == "The Apprentice: Los Angeles". Then construct a 95% confidence interval for the difference in mean viewer response to the Q1_Annoyed question for these two shows. Is there evidence that one show consistently produces a higher mean Q1_Annoyed response among viewers?
+bl_pilot <- pilot %>%
+  filter(Show %in% c("The Biggest Loser", "The Apprentice: Los Angeles"))
+
+mean(Q1_Annoyed ~ Show, data = bl_pilot)
+diffmean(Q1_Annoyed ~ Show, data = bl_pilot)
+
+boot_bl = do(10000)*diffmean(Q1_Annoyed ~ Show, data=mosaic::resample(bl_pilot))
+confint(boot_bl, level=0.95)
+```
+
+##### The question being anaylized is whehter The Biggest Loser or The Apprentice: Los Angeles produces a higher mean response to the question Q1_Annoyed. I used a filter for the entire data and then produced a confidence interval of differences in mean response based on a boot strapped sample. Based on the boot strap, the mean difference between the annoyed response of The Biggest Loser and The Apprentice: Los Angeles is between -0.53 and -0.017 with a 95% confidence interval. Based on this data, it is very likely that the true mean of viewers of the shows find The Apprentice to be more annoying that The Biggest Loser. It would be helpful for stakeholders to take a look at the different aspects of the shows and anayzle other shows with similar aspects in order to figure out what makes The Apprentice more annyoing on average. This could help keep viewers watching. 
+
+```{r}
+# Part C. Consider the show “Dancing with the Stars.” This show has a straightforward premise: it is a dancing competition between couples, with each couple consisting of a celebrity paired with a professional dancer. Per Wikipedia: “Each couple performs predetermined dances and competes against the others for judges’ points and audience votes.” 
+# Despite the simplicity of this format, it seems that some Americans nonetheless find the show befuddling, as evidenced by our survey data on the Q2_Confusing question, which asked survey respondents to agree or disagree with the statement “I found this show confusing.” Any response of 4 or 5 indicated that the survey participant either Agreed (4) or Strongly Agreed (5) that “Dancing with the Stars” was a confusing show.
+# Construct a filtered data set containing only viewer responses where Show == "Dancing with the Stars". Based on this sample of respondents, what proportion of American TV watchers would we expect to give a response of 4 or greater to the “Q2_Confusing” question? Form a large-sample 95% confidence interval for this proportion and report your results.
+
+ds_pilot <- pilot %>%
+  filter(Show %in% "Dancing with the Stars")
+
+ds_pilot$Q2_Confusing <- ifelse(ds_pilot$Q2_Confusing %in% c(4, 5), "greater", "less")
+
+prop(~Q2_Confusing, data=ds_pilot)
+
+boot_ds = do(10000)*prop(~ Q2_Confusing, data=mosaic::resample(ds_pilot))
+confint(boot_ds, level=0.95)
+```
+
+The question being looked at is what an estimate of the true proportions of Americans who think that Dancing with the Stars is confusing.  I used a filter for the entire data and then produced a confidence interval of the proportion of the people who scored the show a 4 or 5 on the confused scale based on a boot strapped sample. Based on the data, it is estimated that between 3.87% and 11.6% of Americans find Dancing with the Stars confusing(a score of 4 or 5) with a 95% confidence level. The estimated proportion of Americans who find it confusing is 8.29%. Based on the data, a stakeholder might consider increasing understandability of the show. With a high end of more than 1/10 Americans being confused, it might be worth it to get those 1/10 of Americans as viewers. 
+
+***
+## Problem 4
+```{r}
+ebay <- read.csv('ebay.csv')
+ebay <- ebay %>%
+  mutate(ratio = rev_after / rev_before)
+
+mean(ratio ~ adwords_pause, data = ebay)
+diffmean(ratio ~ adwords_pause, data = ebay)
+
+boot_ebay = do(10000)*diffmean(ratio ~ adwords_pause, data=mosaic::resample(ebay))
+confint(boot_ebay, level=0.95)
+```
+
+##### The question being anaylized is whether or not paid Google ad words makes a difference in Ebay's sales. I created a confidence interval for a bootstrap based on the sample. This was done on the ratio between sales during the month where they ran the experiment and sales before the month of the experiment. Based on the data, the difference between the average ratio for the control group and the average ratio for the group that had ad words turned off was between -0.091 and -0.012 with a 95% confidence interval. Since both ends are negative, one can say with 95% confidence that turning off ad words negatively impacts the ratio of sales. A stakeholder might want to keep ad words on in order to increase revenue. 
