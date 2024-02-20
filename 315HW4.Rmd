@@ -1,6 +1,6 @@
 ---
 title: "SDS315 HW 4"
-author: "Annabella Smith"
+author: "Annabella Smith - AMS23856"
 date: "2024-02-18"
 output: html_document
 ---
